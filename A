@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Partner Stability & Relationship Health Checker</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f8c8dc, #e6e6fa, #add8e6);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
+            overflow-y: auto; /* Ensure scrollable for mobile and PC */
+        }
+        .container {
+            max-width: 600px;
+            width: 90%;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            margin: 20px 0; /* Add margin for better scrolling */
+        }
+        h1 {
+            color: #ff69b4;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+        .heart {
+            color: #ff1493;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        .selection {
+            margin-bottom: 20px;
+        }
+        button {
+            background: linear-gradient(135deg, #ffb6c1, #dda0dd);
+            border: none;
+            border-radius: 25px;
+            padding: 12px 25px;
+            color: white;
+            font-size: 1em;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 5px;
+        }
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .question {
+            display: none;
+            margin-bottom: 20px;
+        }
+        .question.active {
+            display: block;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .option {
+            background: #f0f8ff;
+            border-radius: 15px;
+            padding: 10px;
+            cursor: pointer;
+            transition: background 0.2s, border 0.2s;
+            border: 2px solid transparent;
+        }
+        .option:hover {
+            background: #e0f7fa;
+        }
+        .option.selected {
+            background: #add8e6;
+            border-color: #ff69b4;
+        }
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .progress {
+            width: 100%;
+            height: 10px;
+            background: #ddd;
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ff69b4, #dda0dd);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        .result {
+            display: none;
+            margin-top: 20px;
+        }
+        .score {
+            font-size: 2em;
+            color: #ff1493;
+            margin-bottom: 10px;
+        }
+        .interpretation {
+            font-weight: bold;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+        .reasons, .suggestions {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        .reasons ul, .suggestions ul {
+            list-style-type: disc;
+            padding-left: 20px;
+        }
+        .disclaimer {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 20px;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+            .nav-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="heart">💕</div>
+        <h1>Partner Stability & Relationship Health Checker</h1>
+        <div class="disclaimer">
+            This tool is for self-reflection only and not a substitute for professional counseling.
+        </div>
+        <div id="selection" class="selection">
+            <p>You are a:</p>
+            <button id="girlfriend">Girlfriend</button>
+            <button id="boyfriend">Boyfriend</button>
+        </div>
+        <div class="progress">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        <div id="questions"></div>
+        <div id="result" class="result">
+            <div class="score" id="score"></div>
+            <div class="interpretation" id="interpretation"></div>
+            <div class="reasons">
+                <h3>Why this result?</h3>
+                <ul id="reasons-list"></ul>
+            </div>
+            <div class="suggestions">
+                <h3>Improvement Suggestions</h3>
+                <ul id="suggestions-list"></ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            "Does {pronoun} trust you without constant doubt?",
+            "Does {pronoun} communicate problems calmly instead of shouting?",
+            "Does {pronoun} respect your personal boundaries?",
+            "Does {pronoun} take responsibility when wrong?",
+            "Does {pronoun} listen without interrupting or mocking?",
+            "Does {pronoun} avoid controlling your choices?",
+            "Does {pronoun} support your goals and ambitions?",
+            "Does {pronoun} manage anger without emotional outbursts?",
+            "Does {pronoun} avoid emotional manipulation or guilt-tripping?",
+            "Does {pronoun} respect your opinions even when disagreeing?",
+            "Does {pronoun} handle conflicts maturely?",
+            "Does {pronoun} avoid silent treatment as punishment?",
+            "Does {pronoun} make you feel emotionally safe?",
+            "Does {pronoun} show consistency in behavior?",
+            "Does {pronoun} apologize genuinely when hurtful?",
+            "Does {pronoun} avoid jealousy without reason?",
+            "Does {pronoun} encourage open communication?",
+            "Does {pronoun} treat you with respect during arguments?",
+            "Does {pronoun} think about long-term stability?",
+            "Does {pronoun} value mutual growth in the relationship?"
+        ];
+
+        const options = [
+            { text: "Always", value: 1 },
+            { text: "Often", value: 0.75 },
+            { text: "Sometimes", value: 0.5 },
+            { text: "Rarely", value: 0.25 },
+            { text: "Never", value: 0 }
+        ];
+
+        let userRole = '';
+        let currentQuestion = 0;
+        let answers = [];
+        let pronoun = '';
+        let selectedOption = null;
+
+        document.getElementById('girlfriend').addEventListener('click', () => {
+            userRole = 'girlfriend';
+            pronoun = 'he';
+            startQuiz();
+        });
+
+        document.getElementById('boyfriend').addEventListener('click', () => {
+            userRole = 'boyfriend';
+            pronoun = 'she';
+            startQuiz();
+        });
+
+        function startQuiz() {
+            document.getElementById('selection').style.display = 'none';
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const questionsDiv = document.getElementById('questions');
+            questionsDiv.innerHTML = '';
+            if (currentQuestion < questions.length) {
+                const qDiv = document.createElement('div');
+                qDiv.className = 'question active';
+                qDiv.innerHTML = `<h3>${questions[currentQuestion].replace('{pronoun}', pronoun)}</h3>`;
+                const optionsDiv = document.createElement('div');
+                optionsDiv.className = 'options';
+                options.forEach((option, index) => {
+                    const optDiv = document.createElement('div');
+                    optDiv.className = 'option';
+                    optDiv.textContent = option.text;
+                    optDiv.addEventListener('click', () => selectOption(index, optDiv));
+                    optionsDiv.appendChild(optDiv);
+                });
+                qDiv.appendChild(optionsDiv);
+
+                const navDiv = document.createElement('div');
+                navDiv.className = 'nav-buttons';
+                const prevBtn = document.createElement('button');
+                prevBtn.textContent = 'Previous';
+                prevBtn.disabled = currentQuestion === 0;
+                prevBtn.addEventListener('click', previousQuestion);
+                navDiv.appendChild(prevBtn);
+
+                const nextBtn = document.createElement('button');
+                nextBtn.textContent = 'Next';
+                nextBtn.id = 'next-btn';
+                nextBtn.disabled = true;
+                nextBtn.addEventListener('click', nextQuestion);
+                navDiv.appendChild(nextBtn);
+
+                qDiv.appendChild(navDiv);
+                questionsDiv.appendChild(qDiv);
+                updateProgress();
+            } else {
+                showResult();
+            }
+        }
+
+        function selectOption(index, element) {
+            selectedOption = options[index].value;
+            // Remove selected class from all options
+            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            // Add selected class to clicked option
+            element.classList.add('selected');
+            // Enable Next button
+            document.getElementById('next-btn').disabled = false;
+        }
+
+        function nextQuestion() {
+            if (selectedOption !== null) {
+                answers[currentQuestion] = selectedOption;
+                selectedOption = null;
+                currentQuestion++;
+                renderQuestion();
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                selectedOption = answers[currentQuestion] || null;
+                renderQuestion();
+            }
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progress-bar').style.width = progress + '%';
+        }
+
+        function showResult() {
+            document.getElementById('questions').style.display = 'none';
+            document.getElementById('progress-bar').style.display = 'none';
+            const totalScore = answers.reduce((sum, val) => sum + val, 0);
+            const score = Math.round(totalScore * 20 / answers.length * 100) / 100; // Scale to 20
+            document.getElementById('score').textContent = `Your Partner’s Stability Score: ${score} / 20`;
+            let interpretation = '';
+            let emoji = '';
+            let suggestions = [];
+            if (score >= 16) {
+                interpretation = 'Mature & Healthy Partner';
+                emoji = '💕😘';
+                suggestions = ['Maintain open communication', 'Continue emotional respect', 'Schedule quality time regularly'];
+            } else if (score >= 11) {
+                interpretation = 'Mostly Mature, Needs Improvement';
+                emoji = '😊';
+                suggestions = ['Practice calm communication', 'Set emotional boundaries', 'Address insecurity openly'];
+            } else if (score >= 6) {
+                interpretation = 'Immature Relationship Pattern';
+                emoji = '😢';
+                suggestions = ['Learn emotional regulation', 'Avoid blame culture', 'Seek relationship guidance'];
+            } else {
+                interpretation = 'Toxic & Emotionally Unsafe';
+                emoji = '😭';
+                suggestions = ['Prioritize emotional safety', 'Consider professional counseling', 'Re-evaluate relationship health'];
+            }
+            document.getElementById('interpretation').textContent = `${interpretation} ${emoji}`;
+            const suggestionsList = document.getElementById('suggestions-list');
+            suggestionsList.innerHTML = '';
+            suggestions.forEach(sug => {
+                const li = document.createElement('li');
+                li.textContent = sug;
+                suggestionsList.appendChild(li);
+            });
+
+            // Dynamic reasons based on categories
+            const reasons = generateReasons(answers);
+            const reasonsList = document.getElementById('reasons-list');
+            reasonsList.innerHTML = '';
+            reasons.forEach(reason => {
+                const li = document.createElement('li');
+                li.textContent = reason;
+                reasonsList.appendChild(li);
+            });
+
+            document.getElementById('result').style.display = 'block';
+        }
+
+        function generateReasons(answers) {
+            const categories = {
+                trust: [0], // Question 1
+                communication: [1, 4, 16], // Questions 2,5,17
+                boundaries: [2, 5, 9], // 3,6,10
+                responsibility: [3, 14], // 4,15
+                anger: [7, 11, 17], // 8,12,18
+                manipulation: [8, 15], // 9,16
+                safety: [12, 13], // 13,14
+                longTerm: [18, 19] // 19,20
+            };
+            const reasons = [];
+            Object.keys(categories).forEach(cat => {
+                const avg = categories[cat].reduce((sum, idx) => sum + answers[idx], 0) / categories[cat].length;
+                if (avg < 0.5) {
+                    switch (cat) {
+                        case 'trust': reasons.push('Low trust in the relationship'); break;
+                        case 'communication': reasons.push('Poor communication skills'); break;
+                        case 'boundaries': reasons.push('Issues with respecting boundaries'); break;
+                        case 'responsibility': reasons.push('Lack of accountability'); break;
+                        case 'anger': reasons.push('Difficulty managing anger'); break;
+                        case 'manipulation': reasons.push('Signs of emotional manipulation'); break;
+                        case 'safety': reasons.push('Lack of emotional safety'); break;
+                        case 'longTerm': reasons.push('Not focused on long-term stability'); break;
+                    }
+                }
+            });
+            // Ensure 4-6 reasons, pad if necessary
+            while (reasons.length < 4) {
+                reasons.push('General areas for improvement in relationship dynamics');
+            }
+            return reasons.slice(0, 6);
+        }
+    </script>
+</body>
+</html>
